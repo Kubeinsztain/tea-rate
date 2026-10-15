@@ -5,16 +5,22 @@
     "build": "turbo run build",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "db:generate": "turbo run db:generate",
+    "db:migrate": "turbo run db:migrate",
+    "db:studio": "turbo run db:studio",
+    "db:seed": "turbo run db:seed"
   },
   "devDependencies": {
-    "prettier": "3.9.6",
-    "turbo": "^2.11.8",
+    "@biomejs/biome": "2.5.14",
+    "turbo": "2.11.8",
     "typescript": "7.0.2"
   },
   "engines": {
-    "node": ">=24"
+    "bun": ">=1.4.2"
   },
   "devEngines": {
     "packageManager": {
@@ -24,6 +30,7 @@
   },
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "tools/*"
   ]
 }

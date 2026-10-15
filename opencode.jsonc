@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permissions": [
+    {
+      "action": "shell",
+      "resource": "pnpm *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "podman *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "podman-compose *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "docker *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "docker-compose *",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "bun run check-types",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "bun run check",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "bun run build",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "bun run test",
+      "effect": "allow"
+    }
+  ]
+}

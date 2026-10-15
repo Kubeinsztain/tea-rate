@@ -1,0 +1,44 @@
+{
+  "name": "@repo/env",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./load-env-files": {
+      "types": "./dist/dotenv.d.ts",
+      "default": "./dist/dotenv.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "check-types": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "dotenv": "18.0.2",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "26.6.2",
+    "tsdown": "0.23.0"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

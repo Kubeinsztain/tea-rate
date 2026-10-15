@@ -1,159 +1,79 @@
-# Turborepo starter
+# tea-rate
 
-This Turborepo starter is maintained by the Turborepo core team.
+A personal tea journal with a shared tea catalog — the seed of a tea-rating
+community. Built with **hexagonal architecture in a functional style** on the
+[Effect](https://effect.website) ecosystem.
 
-## Using this example
+## Stack
 
-Run the following command:
+- **TypeScript** + **Bun** (package manager & local runtime)
+- **Turborepo** monorepo (apps / packages / tools)
+- **Next.js** (App Router) + **Tailwind CSS v4** for the web app
+- **Effect** for the pure core (domain + use cases)
+- **PostgreSQL** + **Drizzle ORM** (stable 0.x, classic `pg` driver) for persistence
+- **`@repo/env`** (Zod) for validated, fail-fast environment variables
+- **Biome** for linting & formatting, **Vitest** for tests
 
-```sh
-npx create-turbo@latest
+## Layout
+
+```
+apps/
+  web/          Next.js app (the driving adapter: UI + server actions)
+packages/
+  core/         Pure domain + application (ports + use cases) — no IO
+  infra/        Driven adapters: Drizzle schema, Postgres repositories
+  env/          Type-safe env validation (Zod) via createEnv
+  typescript-config/
+docs/
+  context/      Architecture overview
+  decisions/    ADRs
 ```
 
-## What's inside?
+Dependencies point inward: `web → infra → core`.
 
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `@next/eslint-plugin-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Getting started
 
 ```sh
-cd my-turborepo
-turbo build
+bun install
+just env                      # create .env from .env.example
+just db-up                    # Postgres 18 (docker compose up)
+just db-generate              # create SQL migrations from the schema
+just db-migrate               # apply migrations
+just db-seed                  # insert a few sample teas
+just dev                      # start the web app on :3000
 ```
 
-Without global `turbo`, use your package manager:
+`@repo/env` validates `DATABASE_URL` and `NODE_ENV` at startup and fails fast
+with a clear message if they're missing or invalid (set `SKIP_ENV_VALIDATION=true`
+to bypass, e.g. during Docker builds). Run `just --list` for all recipes.
+
+## Common commands
 
 ```sh
-cd my-turborepo
-npx turbo build
-bun exec turbo build
-bun exec turbo build
+just dev           # run all dev servers
+just check         # Biome lint + format check
+just check-types   # TypeScript across the monorepo
+just test          # Vitest
+just build         # production build (Next.js standalone output)
+just db-studio     # Drizzle Studio (schema browser)
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Architecture in one rule
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
+Business logic lives only in `packages/core` as pure `Effect`s over ports
+(`Context.Service` tags). The web server action is a thin shell:
 
-```sh
-turbo build --filter=docs
+```ts
+const note = await Effect.runPromise(
+  recordTasting({ teaId, rating, notes }).pipe(Effect.provide(AppLive)),
+);
 ```
 
-Without global `turbo`:
+Because `core` is IO- and framework-free, the same use cases back the web app
+today and a REST/RPC API (for the future mobile app) tomorrow, and run unchanged
+on Vercel, Bun self-host, or the edge.
 
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+See the [documentation index](docs/README.md) — architecture in
+[docs/architecture/](docs/architecture/), domain concepts in
+[docs/domains/](docs/domains/), and the ADRs in
+[docs/decisions/](docs/decisions/).
