@@ -28,22 +28,22 @@
     },
     {
       "action": "shell",
-      "resource": "bun run check-types",
+      "resource": "bun run check-types *",
       "effect": "allow"
     },
     {
       "action": "shell",
-      "resource": "bun run check",
+      "resource": "bun run check *",
       "effect": "allow"
     },
     {
       "action": "shell",
-      "resource": "bun run build",
+      "resource": "bun run build *",
       "effect": "allow"
     },
     {
       "action": "shell",
-      "resource": "bun run test",
+      "resource": "bun run test *",
       "effect": "allow"
     }
   ]
