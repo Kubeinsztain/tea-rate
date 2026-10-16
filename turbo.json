@@ -4,6 +4,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**", "dist/**"]
     },
@@ -18,24 +19,29 @@
     },
     "dev": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "cache": false,
       "persistent": true
     },
     "db:generate": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "cache": false
     },
     "db:migrate": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "cache": false
     },
     "db:studio": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "cache": false,
       "persistent": true
     },
     "db:seed": {
       "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
       "cache": false
     }
   }
