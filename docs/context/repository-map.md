@@ -6,7 +6,8 @@
 ```
 tea-rate/
 ├── apps/
-│   └── web/                  Next.js driving adapter (UI + server actions)
+│   ├── web/                  Next.js driving adapter (UI + server actions, /api/auth/* proxy)
+│   └── auth/                 internal auth service (Better Auth on Hono, Bun)
 ├── packages/
 │   ├── core/                 pure domain + application (ports + use cases) — no I/O
 │   ├── infra/                driven adapters: Drizzle schema, Postgres repos, env.ts
@@ -21,7 +22,18 @@ tea-rate/
 
 The **driving adapter**. A Next.js App Router app (`output: "standalone"`) whose
 server action is a thin shell that runs the `recordTasting` use case with
-`Effect.provide(AppLive)`. Contains no business logic.
+`Effect.provide(AppLive)`. Contains no business logic. Also the **only public
+surface**: it proxies `/api/auth/*` to the auth service and owns the httpOnly
+session cookie.
+
+## `apps/auth`
+
+The **identity service** (Better Auth on Hono, Bun), internal-only. Owns `User`
+and `Session` in its own Postgres database (Drizzle adapter); sessions are
+database-backed and the auth service is the single source of truth. Sends
+verification/reset email over SMTP (nodemailer). Env validated via `@repo/env`.
+Sits beside the `web → infra → core` axis, not inside it — see
+[ADR-0005](../decisions/0005-separate-auth-service.md).
 
 ## `packages/core`
 

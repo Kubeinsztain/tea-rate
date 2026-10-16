@@ -8,15 +8,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome check .",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@repo/core": "workspace:*",
+    "@repo/env": "workspace:*",
     "@repo/infra": "workspace:*",
     "effect": "^4.0.5",
     "next": "16.3.8",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
@@ -26,6 +29,7 @@
     "@types/react-dom": "19.2.5",
     "postcss": "^8.5.30",
     "tailwindcss": "^4.3.3",
-    "typescript": "7.0.2"
+    "typescript": "7.0.2",
+    "vitest": "^5.0.5"
   }
 }

@@ -9,5 +9,7 @@ domain model (see [`../domains/`](../domains/)).
 
 ## Features
 
+- [auth](auth/) — internal email+password auth service (Better Auth on Hono),
+  proxied through the web app.
 - [env](env/) — type-safe, fail-fast environment variable validation
   (`@repo/env`).

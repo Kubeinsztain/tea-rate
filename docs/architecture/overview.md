@@ -37,6 +37,17 @@ Supporting packages sit beside, not inside, the axis:
 - `packages/env` — Zod env validation, consumed by `infra`.
 - `packages/typescript-config` — shared tsconfigs, dev-time only.
 
+Identity sits beside the axis too, as a separate bounded context:
+
+- `apps/auth` — an internal-only auth service (Better Auth on Hono) that owns
+  `User` and `Session`. It is **not** part of the `web → infra → core` chain;
+  `apps/web` proxies `/api/auth/*` to it and forwards session checks, keeping
+  auth as its own single source of truth. See
+  [0005-separate-auth-service](../decisions/0005-separate-auth-service.md).
+
+So there are **two deployables**: `apps/web` (the only public surface) and
+`apps/auth` (internal, reached only through `apps/web`).
+
 This direction is enforced by *imports alone*: `core`'s `package.json` lists only
 `effect` as a dependency, so an inward-pointing import would fail to typecheck.
 
@@ -65,8 +76,8 @@ Because the core is pure and the adapters are thin, the domain runs unchanged
 across every target:
 
 - **Node / Vercel (serverless)** — `apps/web` with `output: "standalone"`.
-- **Bun (self-host)** — `@repo/infra` uses the classic `pg` driver, which runs
-  under Bun; `core` is runtime-agnostic.
+- **Bun (self-host)** — `apps/auth` is a `Bun.serve` server; `@repo/infra` uses
+  the classic `pg` driver, which runs under Bun; `core` is runtime-agnostic.
 - **Edge** — a different driving adapter can invoke the same use cases.
 
 Only the adapter layer changes: swap the `pg` `Pool` for a serverless HTTP driver

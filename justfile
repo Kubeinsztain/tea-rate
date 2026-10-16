@@ -2,6 +2,11 @@
 # Load the root `.env` into every recipe (single source of truth for env vars).
 set dotenv-load
 
+alias db := db-up
+alias dbd := db-down
+alias dbc := db-connect
+alias dbr := db-reset
+
 # Show available recipes.
 default:
     @just --list
@@ -17,26 +22,30 @@ env:
 
 # Start Postgres.
 db-up:
-    docker compose up -d postgres
+    podman compose -f compose-db-local.yml up -d postgres
 
 # Stop Postgres (keeps the data volume).
 db-down:
-    docker compose down
+    podman compose -f compose-db-local.yml down
 
 # Stop Postgres and recreate with a fresh (empty) data volume.
 db-reset:
-    docker compose down -v
-    docker compose up -d postgres
+    podman compose -f compose-db-local.yml down -v
+    podman compose -f compose-db-local.yml up -d postgres
+
+# Open psql against the local database.
+db-connect:
+    psql -h localhost -U postgres
 
 # ---- schema & seed ----------------------------------------------------------
 
-# Generate SQL migrations from the Drizzle schema.
+# Generate SQL migrations from the Drizzle schema (journal app only).
 db-generate:
-    bun run db:generate
+    bun run db:generate -- --filter=@repo/infra
 
-# Apply pending migrations.
+# Apply pending migrations (journal app only).
 db-migrate:
-    bun run db:migrate
+    bun run db:migrate -- --filter=@repo/infra
 
 # Insert the sample teas.
 db-seed:
@@ -45,6 +54,32 @@ db-seed:
 # Open Drizzle Studio (schema browser).
 db-studio:
     bun run db:studio
+
+# ---- auth service -----------------------------------------------------------
+# The auth service owns a separate database on the same Postgres instance and
+# reads its own `DATABASE_URL` from `apps/auth/.env` (see apps/auth/.env.example).
+# Its recipes `cd apps/auth` and clear the journal `DATABASE_URL` so the auth
+# `.env` value applies.
+
+# Create the auth service's own database.
+db-auth-create:
+    psql -h localhost -U postgres -c "CREATE DATABASE tea_rate_auth"
+
+# Generate auth-service migrations.
+db-auth-generate:
+    cd apps/auth && env -u DATABASE_URL bun run db:generate
+
+# Apply auth-service migrations.
+db-auth-migrate:
+    cd apps/auth && env -u DATABASE_URL bun run db:migrate
+
+# Run the auth service on its own port (default 4000).
+auth-dev:
+    cd apps/auth && env -u DATABASE_URL bun run dev
+
+# Run the auth service test suite (uses a throwaway test database).
+auth-test:
+    cd apps/auth && bun run test
 
 # ---- app -------------------------------------------------------------------
 
@@ -69,12 +104,12 @@ test:
 # ---- cleanup -----------------------------------------------------------------
 
 # Stop Postgres, drop its data volume, and remove build caches.
-clean:
-    docker compose down -v
+db-clean:
+    podman compose -f compose-db-local.yml down -v
     rm -rf .turbo apps/*/.next apps/*/.turbo packages/*/.turbo
     @echo "Stopped containers, removed volumes and build caches."
 
 # clean + remove all node_modules (run `just install` afterwards).
-nuke: clean
+nuke: db-clean
     rm -rf node_modules apps/*/node_modules packages/*/node_modules
     @echo "Removed node_modules. Run 'just install' to restore."

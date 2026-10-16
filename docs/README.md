@@ -46,13 +46,18 @@ Recorded architecture decisions (ADRs) — why, alternatives, consequences.
 - [ADR-0002: PostgreSQL + Drizzle](decisions/0002-postgres-drizzle.md)
 - [ADR-0003: Next.js as driving adapter](decisions/0003-nextjs-integration.md)
 - [ADR-0004: env validation](decisions/0004-env-validation.md)
+- [ADR-0005: separate auth service](decisions/0005-separate-auth-service.md)
 
 ## Current Work
 
 In-progress efforts, handoffs, specs, and plans live under
 [`work/`](work/) — one directory per effort. This is temporary space:
 useful bits get promoted into the permanent sections above, the rest gets
-deleted. Currently empty.
+deleted.
+
+- [Observability tooling](work/observability/README.md) — proposed
+  monitoring/logging/ops stack: Effect logging, GlitchTip, Gatus,
+  OpenTelemetry; alternatives compared, phased plan.
 
 ## Direction
 

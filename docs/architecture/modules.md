@@ -3,8 +3,9 @@
 > One section per package: responsibilities, key files, dependencies.
 
 The packages form a dependency arrow `web → infra → core`, with `env` and
-`typescript-config` as supporting packages. Full picture in
-[overview.md](overview.md).
+`typescript-config` as supporting packages, and `apps/auth` as a separate
+internal identity service beside the axis (like `env`, not inside it). Full
+picture in [overview.md](overview.md).
 
 ## `apps/web`
 
@@ -24,6 +25,33 @@ errors back to user messages. No business logic lives here.
 
 Dependencies: `@repo/core`, `@repo/infra`, `effect`, `next`, `react`,
 `react-dom`. (Dev: `@repo/typescript-config`, Tailwind v4, TypeScript.)
+
+## `apps/auth`
+
+The **identity service**: Better Auth on Hono (Bun), internal-only and proxied
+through `apps/web`'s `/api/auth/*`. It sits **beside** the `web → infra → core`
+axis, not inside it — it depends on nothing in `core`/`infra` and shares no
+domain concepts with the journal. Owns `User`/`Session` and is the single source
+of truth for session validity; sessions are database-backed in its own Postgres
+database. See [0005-separate-auth-service](../decisions/0005-separate-auth-service.md).
+
+- `src/index.ts` — `Bun.serve` entrypoint; wires db, auth, mail sender, Hono app.
+- `src/app.ts` — `createApp`: a Hono app forwarding every method at
+  `/api/auth/*` to Better Auth's handler.
+- `src/auth.ts` — `createAuth`: Better Auth config (email+password,
+  database-backed sessions, Drizzle adapter, optional email verification, rate
+  limiting, SMTP mail).
+- `src/env.ts` — `createEnv` for the auth variables (fail-fast).
+- `src/db/schema.ts` — Better Auth tables `user`, `session`, `account`,
+  `verification`.
+- `src/db/client.ts` — `makeDatabase`: Drizzle over a `pg` `Pool`.
+- `src/mail/sender.ts` — `MailSender` seam; `src/mail/smtp.ts` — nodemailer.
+- `drizzle.config.ts` — `drizzle-kit` config (postgresql dialect).
+
+Dependencies: `better-auth`, `@better-auth/drizzle-adapter`, `hono`,
+`drizzle-orm`, `pg`, `nodemailer`, `@repo/env`, `zod`. (Dev:
+`@repo/typescript-config`, `@types/bun`, `@types/pg`, `drizzle-kit`,
+`typescript`, `vitest`.)
 
 ## `packages/core` (`@repo/core`)
 

@@ -32,6 +32,9 @@
 - **Vertical slice** — one feature implemented end-to-end through every layer
   (domain → use case → adapter → UI). The sole implemented slice is
   `recordTasting`.
+- **Auth service** — the separate identity context (Better Auth on Hono) that
+  owns `User`s and `Session`s. The web app proxies `/api/auth/*` to it; it is
+  not exposed publicly.
 
 ## Domain
 
@@ -50,6 +53,11 @@
 - **inventory** — a user's record of the teas they own (future feature).
 - **community** — the future social layer: shared ratings, reviews, and social
   features.
+- **User** — a person with an account; the eventual owner of a journal,
+  inventory, and community activity. Lives in the auth service and is referenced
+  elsewhere by ID only.
+- **Session** — an authenticated, user-bound context for a request. Issued and
+  verified by the auth service (the single source of truth).
 
 ## Related
 
