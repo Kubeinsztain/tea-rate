@@ -4,3 +4,13 @@ pre-commit:
       glob: "*.{ts,tsx,js,jsx,json,jsonc}"
       run: bunx biome check --write {staged_files}
       stage_fixed: true
+    secrets:
+      # `docs/work/**` is tracked on purpose, so a leaked secret there is a real
+      # leak. gitleaks scans the staged changes; skip gracefully when the binary
+      # is not installed (CI runs the same scan on every push/PR).
+      run: |
+        if command -v gitleaks >/dev/null 2>&1; then
+          gitleaks git --staged --redact --no-banner
+        else
+          echo "gitleaks not installed; skipping local secret scan (CI scans on push/PR)"
+        fi

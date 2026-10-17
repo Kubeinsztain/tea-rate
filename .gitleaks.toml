@@ -1,0 +1,14 @@
+# gitleaks configuration — https://github.com/gitleaks/gitleaks
+#
+# Uses gitleaks' built-in rules and only relaxes them for committed placeholders.
+# Real values live in `.env` files, which are git-ignored — they must never
+# reach a tracked file (see docs/context/coding-guidelines.md).
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Committed placeholder/sample env files only — never real values."
+paths = [
+  '''\.env\.example$''',
+]
