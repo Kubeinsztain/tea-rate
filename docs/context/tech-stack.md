@@ -31,6 +31,7 @@
 ## Quality
 
 - **Biome 2.5.14** — lint + format + import sorting in one tool.
+- **gitleaks** — secret scanning in pre-commit (lefthook) and CI.
 - **Vitest 5** — unit tests; the core is tested with in-memory fake `Layer`s.
 - **just 1.58** — task runner; recipes for env, DB, dev, build, test, cleanup.
 - **Renovate + GitHub Actions + lefthook** — dependency updates, CI, and git

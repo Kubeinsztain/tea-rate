@@ -41,6 +41,17 @@ Never use Effect v3 names. Ports are `Context.Service` tags (not
 - Keep the web layer thin; exercise use cases end-to-end through a server
   action.
 
+## Secrets and tracked docs
+
+- **Never commit secret values.** Credentials, tokens, keys, cookies,
+  connection strings with passwords, and real user data stay in `.env` files
+  (git-ignored) — not in code, and not in tracked docs.
+- **`docs/**`, including `docs/work/**`, is tracked on purpose** (it preserves
+  the decision/work trail), so it is *not* a safe place for sensitive values.
+  Reference secrets by name and location instead — e.g. `BETTER_AUTH_SECRET`
+  (see `apps/auth/.env.example`) — and use `<redacted>` placeholders.
+- A **gitleaks** scan guards the boundary: pre-commit (when installed) and CI.
+
 ## Related
 
 - [Terminology](terminology.md) — the exact meaning of port, layer, use case.
