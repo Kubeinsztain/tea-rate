@@ -11,3 +11,4 @@ decision, and the consequences.
 | [0003-nextjs-integration](./0003-nextjs-integration.md) | Next.js App Router as the driving adapter | Next.js App Router as the only driving adapter; thin server actions over `core` use cases. |
 | [0004-env-validation](./0004-env-validation.md) | Validated environment variables with @repo/env | Fail-fast, type-safe env validation via a Zod-based `@repo/env` helper. |
 | [0005-separate-auth-service](./0005-separate-auth-service.md) | Separate auth service with Better Auth on Hono | Better Auth as an internal-only Hono service proxied through Next.js; database-backed sessions, Drizzle adapter, generic SMTP. |
+| [0006-secrets-in-tracked-docs](./0006-secrets-in-tracked-docs.md) | Keep secret values out of tracked docs | Tracked work docs stay; gitleaks (pre-commit + CI) and global agent guidance keep secret values in `.env` only. |

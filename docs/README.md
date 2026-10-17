@@ -47,6 +47,7 @@ Recorded architecture decisions (ADRs) — why, alternatives, consequences.
 - [ADR-0003: Next.js as driving adapter](decisions/0003-nextjs-integration.md)
 - [ADR-0004: env validation](decisions/0004-env-validation.md)
 - [ADR-0005: separate auth service](decisions/0005-separate-auth-service.md)
+- [ADR-0006: secrets in tracked docs](decisions/0006-secrets-in-tracked-docs.md)
 
 ## Current Work
 
