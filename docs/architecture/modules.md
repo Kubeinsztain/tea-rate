@@ -17,8 +17,11 @@ errors back to user messages. No business logic lives here.
 - `app/record-tasting-form.tsx` — `"use client"` form using React's
   `useActionState`.
 - `app/actions.ts` — `"use server"` action `recordTastingAction`; runs
-  `recordTasting(...).pipe(Effect.provide(AppLive))` and maps `TeaNotFound` /
-  `InvalidRating` to `ActionResult` messages.
+  `recordTasting(...).pipe(Effect.provide(AppLive))` and maps its result to the
+  `ActionResult` envelope via `runAction`.
+- `lib/actions/` — the result envelope: `result.ts` (types), `run-action.ts`
+  (`Effect` → `ActionResult`), `messages.ts` (tag → user message table). See
+  [0007-server-action-result-envelope](../decisions/0007-server-action-result-envelope.md).
 - `next.config.js` — `output: "standalone"`; consumes `@repo/core` + `@repo/infra`
   as source via `transpilePackages`, and the built `@repo/env` via
   `serverExternalPackages`.
@@ -61,12 +64,12 @@ framework dependencies.
 - `src/domain/tea.ts` — `Tea`, `NewTea`, `TeaId` (branded), `TeaType` literals.
 - `src/domain/tasting-note.ts` — `TastingNote`, `NewTastingNote`,
   `TastingNoteId`, `BrewMethod`.
-- `src/domain/errors.ts` — `TeaNotFound` and `PersistenceError`
-  (`Schema.TaggedError`).
+- `src/domain/errors.ts` — `InvalidRating`, `PersistenceError`, and
+  `TeaNotFound` (`Schema.TaggedError`).
 - `src/application/ports.ts` — the driven ports `TeaRepository` and
   `JournalRepository` (`Context.Service` tags).
 - `src/application/record-tasting.ts` — the `recordTasting` use case
-  (`Effect.gen`); `InvalidRating` tagged error.
+  (`Effect.gen`).
 - `src/application/record-tasting.test.ts` — unit tests using in-memory fake
   `Layer`s.
 - `src/index.ts` — public barrel export.

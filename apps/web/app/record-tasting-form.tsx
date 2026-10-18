@@ -1,15 +1,15 @@
 "use client";
 
+import type { TastingNote } from "@repo/core";
 import { useActionState } from "react";
-import { type ActionResult, recordTastingAction } from "./actions";
-
-const initial: ActionResult = { ok: false, message: "" };
+import type { ActionResult } from "../lib/actions/result";
+import { recordTastingAction } from "./actions";
 
 export function RecordTastingForm() {
-  const [state, formAction, pending] = useActionState(
-    recordTastingAction,
-    initial,
-  );
+  const [state, formAction, pending] = useActionState<
+    ActionResult<TastingNote> | null,
+    FormData
+  >(recordTastingAction, null);
 
   return (
     <form action={formAction} className="mt-8 space-y-4">
@@ -70,10 +70,12 @@ export function RecordTastingForm() {
         {pending ? "Saving…" : "Record tasting"}
       </button>
 
-      {state.message ? (
-        <p className={state.ok ? "text-green-700" : "text-red-700"}>
-          {state.message}
+      {state?.status === "success" ? (
+        <p className="text-green-700">
+          Recorded {state.data.rating}/5 for this tea.
         </p>
+      ) : state?.status === "error" ? (
+        <p className="text-red-700">{state.error.userMessage}</p>
       ) : null}
     </form>
   );

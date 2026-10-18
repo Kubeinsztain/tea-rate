@@ -1,5 +1,6 @@
-import { Effect, Schema } from "effect";
+import { Effect } from "effect";
 import type { PersistenceError, TeaNotFound } from "../domain/errors";
+import { InvalidRating } from "../domain/errors";
 import type { TastingNote, TastingNoteId } from "../domain/tasting-note";
 import type { TeaId } from "../domain/tea";
 import { JournalRepository, TeaRepository } from "./ports";
@@ -9,11 +10,6 @@ export interface RecordTastingInput {
   readonly rating: number;
   readonly notes: string | null;
 }
-
-export class InvalidRating extends Schema.TaggedError<InvalidRating>()(
-  "InvalidRating",
-  { rating: Schema.Number },
-) {}
 
 export type RecordTastingError = TeaNotFound | PersistenceError | InvalidRating;
 

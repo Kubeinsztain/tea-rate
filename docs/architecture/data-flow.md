@@ -28,12 +28,16 @@ form → server action → recordTasting → ports → Drizzle repositories → 
    const program = recordTasting({ teaId, rating, notes }).pipe(
      Effect.provide(AppLive),
    );
-   const note = await Effect.runPromise(program);
+   return runAction(program);
    ```
 
-   Typed domain errors are mapped to user messages: `TeaNotFound` → "That tea
-   isn't in the catalog yet.", `InvalidRating` → "Rating must be between 1 and
-   5.", anything else → a generic failure.
+   `runAction` (`apps/web/lib/actions/run-action.ts`) runs the effect with
+   `Effect.runPromiseExit` and maps its `Exit` to the `ActionResult` envelope:
+   success → `{ status: "success", data }`; a typed `Fail` → an operational
+   error whose `tag` is looked up in the app's message table (`TeaNotFound` →
+   "That tea isn't in the catalog yet.", `InvalidRating` → "Rating must be
+   between 1 and 5.", `PersistenceError` → a save failure); an unexpected
+   `Defect` → `INTERNAL` with the raw message stripped.
 
 3. **Use case** (`packages/core/src/application/record-tasting.ts`). Pure
    orchestration with no IO. Validates `rating` (1–5, else `InvalidRating`),

@@ -12,3 +12,4 @@ decision, and the consequences.
 | [0004-env-validation](./0004-env-validation.md) | Validated environment variables with @repo/env | Fail-fast, type-safe env validation via a Zod-based `@repo/env` helper. |
 | [0005-separate-auth-service](./0005-separate-auth-service.md) | Separate auth service with Better Auth on Hono | Better Auth as an internal-only Hono service proxied through Next.js; database-backed sessions, Drizzle adapter, generic SMTP. |
 | [0006-secrets-in-tracked-docs](./0006-secrets-in-tracked-docs.md) | Keep secret values out of tracked docs | Tracked work docs stay; gitleaks (pre-commit + CI) and global agent guidance keep secret values in `.env` only. |
+| [0007-server-action-result-envelope](./0007-server-action-result-envelope.md) | Server-action result envelope | A minimal, Effect-native `ActionResult` envelope: `runAction` maps an `Effect`'s exit (typed `Fail` vs `Defect`) to a wire-safe result; package deferred until a second consumer. |
