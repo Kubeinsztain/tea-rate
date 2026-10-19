@@ -1,50 +1,152 @@
 {
   "$schema": "https://opencode.ai/config.json",
+
+  // Load the repository's conventions into every session. AGENTS.md is
+  // discovered automatically; these are the deeper docs it points at.
+  "instructions": [
+    "docs/context/coding-guidelines.md",
+    "docs/context/terminology.md",
+    "docs/context/repository-map.md",
+    "docs/architecture/overview.md"
+  ],
+
+  // Keep edited files in the repo's own format. `biome check --write` matches
+  // lefthook and also sorts imports / applies safe lint fixes.
+  "formatter": {
+    "biome": {
+      "command": ["bunx", "biome", "check", "--write", "$FILE"],
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".json", ".jsonc", ".css"]
+    }
+  },
+
+  // Generated output should not wake the file watcher.
+  "watcher": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/.turbo/**",
+      "**/.next/**",
+      "**/dist/**",
+      "**/coverage/**"
+    ]
+  },
+
   "permissions": [
+    // Hard blocks: tools this repo never wants an agent to drive directly.
+    { "action": "shell", "resource": "pnpm *", "effect": "deny" },
+    { "action": "shell", "resource": "podman *", "effect": "deny" },
+    { "action": "shell", "resource": "podman-compose *", "effect": "deny" },
+    { "action": "shell", "resource": "docker *", "effect": "deny" },
+    { "action": "shell", "resource": "docker-compose *", "effect": "deny" },
+
+    // Local secrets and lockfile state: never edit silently.
+    { "action": "edit", "resource": "*.env", "effect": "deny" },
+    { "action": "edit", "resource": "*.env.*", "effect": "deny" },
+    { "action": "edit", "resource": "*.env.example", "effect": "allow" },
+    { "action": "edit", "resource": "bun.lock", "effect": "ask" },
+
+    // Dependency changes are deliberate.
+    { "action": "shell", "resource": "bun install *", "effect": "ask" },
+    { "action": "shell", "resource": "bun add *", "effect": "ask" },
+    { "action": "shell", "resource": "bun remove *", "effect": "ask" },
+    { "action": "shell", "resource": "bun update *", "effect": "ask" },
+
+    // Persistent processes and DB mutations. `just` recipes hide the inner
+    // command from the shell permission scanner, so they get their own rules.
+    { "action": "shell", "resource": "bun run dev *", "effect": "ask" },
+    { "action": "shell", "resource": "just dev *", "effect": "ask" },
+    { "action": "shell", "resource": "just auth-dev *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-studio *", "effect": "ask" },
+    { "action": "shell", "resource": "bun run db:studio *", "effect": "ask" },
+    { "action": "shell", "resource": "bun run db:migrate *", "effect": "ask" },
+    { "action": "shell", "resource": "bun run db:seed *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-migrate *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-seed *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-up *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-down *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-reset *", "effect": "ask" },
+    { "action": "shell", "resource": "just db-clean *", "effect": "ask" },
+    { "action": "shell", "resource": "just nuke *", "effect": "ask" },
     {
       "action": "shell",
-      "resource": "pnpm *",
-      "effect": "deny"
+      "resource": "just db-auth-migrate *",
+      "effect": "ask"
     },
+    { "action": "shell", "resource": "just db-auth-create *", "effect": "ask" },
+
+    // Read-only git inspection should not interrupt the agent.
+    { "action": "shell", "resource": "git status *", "effect": "allow" },
+    { "action": "shell", "resource": "git diff *", "effect": "allow" },
+    { "action": "shell", "resource": "git log *", "effect": "allow" },
+    { "action": "shell", "resource": "git show *", "effect": "allow" },
     {
       "action": "shell",
-      "resource": "podman *",
-      "effect": "deny"
+      "resource": "git branch --show-current *",
+      "effect": "allow"
     },
-    {
-      "action": "shell",
-      "resource": "podman-compose *",
-      "effect": "deny"
-    },
-    {
-      "action": "shell",
-      "resource": "docker *",
-      "effect": "deny"
-    },
-    {
-      "action": "shell",
-      "resource": "docker-compose *",
-      "effect": "deny"
-    },
+
+    // Verification and code generation: keep the feedback loop fast.
+    { "action": "shell", "resource": "bun run check *", "effect": "allow" },
     {
       "action": "shell",
       "resource": "bun run check-types *",
       "effect": "allow"
     },
+    { "action": "shell", "resource": "bun run build *", "effect": "allow" },
+    { "action": "shell", "resource": "bun run test *", "effect": "allow" },
+    { "action": "shell", "resource": "bun run lint *", "effect": "allow" },
     {
       "action": "shell",
-      "resource": "bun run check *",
+      "resource": "bun run db:generate *",
       "effect": "allow"
     },
+    { "action": "shell", "resource": "bunx vitest *", "effect": "allow" },
+    { "action": "shell", "resource": "bunx biome check *", "effect": "allow" },
+    { "action": "shell", "resource": "bunx biome format *", "effect": "allow" },
+    { "action": "shell", "resource": "just --list *", "effect": "allow" },
+    { "action": "shell", "resource": "just check *", "effect": "allow" },
+    { "action": "shell", "resource": "just check-types *", "effect": "allow" },
+    { "action": "shell", "resource": "just test *", "effect": "allow" },
+    { "action": "shell", "resource": "just build *", "effect": "allow" },
+    { "action": "shell", "resource": "just auth-test *", "effect": "allow" },
+    { "action": "shell", "resource": "just db-generate *", "effect": "allow" },
     {
       "action": "shell",
-      "resource": "bun run build *",
+      "resource": "just db-auth-generate *",
       "effect": "allow"
     },
-    {
-      "action": "shell",
-      "resource": "bun run test *",
-      "effect": "allow"
+    { "action": "shell", "resource": "gitleaks *", "effect": "allow" }
+  ],
+
+  "commands": {
+    "verify": {
+      "description": "Run the CI checks and report failures",
+      "template": "Verify this change with the same commands CI runs: `bun run check`, `bun run check-types`, `bun run test`, then `bun run build` if the change affects build output. Report each failure with the failing command and the first actionable error. Do not fix unrelated issues."
+    },
+    "review": {
+      "description": "Review the current diff against repo conventions",
+      "agent": "plan",
+      "template": "Review the current git diff (staged and unstaged) against AGENTS.md, docs/context/coding-guidelines.md, and docs/architecture/overview.md. Prioritize correctness, dependency-direction violations, missing tests, and secret leakage. Report findings by severity with file:line references. Do not edit files."
+    },
+    "adr": {
+      "description": "Draft an ADR in the repo's format",
+      "template": "Draft an ADR for: $ARGUMENTS. Follow the format of docs/decisions/0001-effect-ts.md (Status, Date, Context with alternatives, Decision, Consequences, See also). Choose the next free number and update docs/decisions/README.md. Ask before marking it accepted."
     }
-  ]
+  },
+
+  "agents": {
+    "architecture-reviewer": {
+      "description": "Read-only review against tea-rate's hexagonal architecture and coding guidelines",
+      "mode": "subagent",
+      "system": "You review changes in the tea-rate repository. Read docs/context/coding-guidelines.md, docs/context/terminology.md, docs/context/repository-map.md, docs/architecture/overview.md, and the relevant ADRs. Check that dependencies point inward (web -> infra -> core), core has no I/O or framework imports, use cases are Effect.gen functions over Context.Service ports, domain errors are Schema.TaggedError, Effect v4 names are used, env is read only via @repo/env, and no secret values appear in tracked docs. Report findings in severity order with file:line references. Do not edit files.",
+      "permissions": [
+        { "action": "edit", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "*", "effect": "deny" },
+        { "action": "shell", "resource": "git diff *", "effect": "allow" },
+        { "action": "shell", "resource": "git status *", "effect": "allow" },
+        { "action": "shell", "resource": "git log *", "effect": "allow" },
+        { "action": "shell", "resource": "git show *", "effect": "allow" },
+        { "action": "shell", "resource": "gitleaks *", "effect": "allow" }
+      ]
+    }
+  }
 }
