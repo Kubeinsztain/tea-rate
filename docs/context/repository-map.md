@@ -15,7 +15,7 @@ tea-rate/
 │   └── typescript-config/    shared tsconfigs: base / library / nextjs / react-library
 ├── tools/                    (empty — reserved for repo tooling)
 ├── justfile                  task runner recipes
-└── docker-compose.yml        local Postgres 18
+└── compose-db-local.yml      local Postgres 18
 ```
 
 ## `apps/web`
@@ -65,7 +65,7 @@ Task runner (`set dotenv-load`). Recipes: `env`, `db-up`/`db-down`/`db-reset`,
 `db-generate`/`db-migrate`/`db-seed`/`db-studio`, `dev`, `build`, `check`,
 `check-types`, `test`, `clean`, `nuke`.
 
-## `docker-compose.yml`
+## `compose-db-local.yml`
 
 Local **PostgreSQL 18** service with a persisted `pgdata` volume, exposed on
 `5432`.

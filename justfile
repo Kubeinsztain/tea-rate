@@ -101,6 +101,35 @@ check-types:
 test:
     bun run test
 
+# ---- images & migrate (podman) ---------------------------------------------
+
+# Build all three OCI images (web, auth, migrate).
+images: image-web image-auth image-migrate
+
+# Build the web image (Next.js standalone output).
+image-web:
+    podman build -f apps/web/Dockerfile -t tea-rate-web .
+
+# Build the auth image (Bun).
+image-auth:
+    podman build -f apps/auth/Dockerfile -t tea-rate-auth .
+
+# Build the migrate image (applies both Drizzle migrations).
+image-migrate:
+    podman build -f Dockerfile.migrate -t tea-rate-migrate .
+
+# Apply both Drizzle migrations (journal + auth) via the migrate image.
+# Build it first with `just image-migrate`; requires Postgres running (`just
+# db-up`). The auth database is created if missing. The journal URL defaults to
+# DATABASE_URL (root `.env`); AUTH_DATABASE_URL must be set — see apps/auth/.env.
+# Override both for non-local deployments:
+#   JOURNAL_DATABASE_URL=… AUTH_DATABASE_URL=… just migrate
+migrate:
+    podman run --rm --network host \
+        -e JOURNAL_DATABASE_URL="${JOURNAL_DATABASE_URL:-${DATABASE_URL:?set DATABASE_URL in .env}}" \
+        -e AUTH_DATABASE_URL="${AUTH_DATABASE_URL:?set AUTH_DATABASE_URL (auth DB; see apps/auth/.env)}" \
+        tea-rate-migrate
+
 # ---- cleanup -----------------------------------------------------------------
 
 # Stop Postgres, drop its data volume, and remove build caches.

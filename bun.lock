@@ -19,6 +19,7 @@
         "@repo/env": "workspace:*",
         "better-auth": "^1.7.10",
         "drizzle-orm": "^0.45.4",
+        "effect": "^4.0.5",
         "hono": "^4.13.13",
         "nodemailer": "^10.1.2",
         "pg": "^8.23.1",

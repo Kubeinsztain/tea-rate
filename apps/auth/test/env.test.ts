@@ -30,6 +30,27 @@ describe("auth environment validation", () => {
     expect(env.PORT).toBe(4000);
     // WEB_ORIGIN is optional and defaults to the local web app origin.
     expect(env.WEB_ORIGIN).toBe("http://localhost:3000");
+    // MAIL_MODE defaults to "console" so a self-hosted deploy needs no SMTP.
+    expect(env.MAIL_MODE).toBe("console");
+  });
+
+  it("loads without SMTP settings when MAIL_MODE is console (the default)", async () => {
+    for (const [key, value] of Object.entries(VALID_ENV)) {
+      if (!key.startsWith("SMTP_")) {
+        vi.stubEnv(key, value);
+      }
+    }
+    const { env } = await loadEnvModule();
+    expect(env.MAIL_MODE).toBe("console");
+    expect(env.SMTP_HOST).toBeUndefined();
+  });
+
+  it("fails fast when MAIL_MODE is neither console nor smtp", async () => {
+    for (const [key, value] of Object.entries(VALID_ENV)) {
+      vi.stubEnv(key, value);
+    }
+    vi.stubEnv("MAIL_MODE", "carrier-pigeon");
+    await expect(loadEnvModule()).rejects.toThrow(/MAIL_MODE/);
   });
 
   it("fails fast when BETTER_AUTH_SECRET is missing", async () => {
@@ -54,13 +75,5 @@ describe("auth environment validation", () => {
     }
     vi.stubEnv("WEB_ORIGIN", "not-a-url");
     await expect(loadEnvModule()).rejects.toThrow(/WEB_ORIGIN/);
-  });
-
-  it("fails fast when a required SMTP setting is missing", async () => {
-    for (const [key, value] of Object.entries(VALID_ENV)) {
-      vi.stubEnv(key, value);
-    }
-    vi.stubEnv("SMTP_HOST", "");
-    await expect(loadEnvModule()).rejects.toThrow(/SMTP_HOST/);
   });
 });

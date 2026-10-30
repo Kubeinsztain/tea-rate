@@ -32,7 +32,7 @@ against Effect 4.0.x.
 ## Consequences
 
 - A real database is required to run the app end-to-end (local dev uses the
-  `docker-compose.yml` Postgres 18 container).
+  `compose-db-local.yml` Postgres 18 container).
 - The domain is isolated from SQL; a different database would only touch
   `packages/infra`.
 - The `pg` `Pool` is created once per runtime; on serverless each cold start

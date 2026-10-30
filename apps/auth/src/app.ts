@@ -9,6 +9,9 @@ import type { Auth } from "./auth";
 export const createApp = (auth: Auth) => {
   const app = new Hono();
 
+  // Liveness probe: answers before any request reaches Better Auth.
+  app.get("/api/health", (c) => c.json({ status: "ok" }));
+
   app.all("/api/auth/*", (c) => auth.handler(c.req.raw));
 
   return app;

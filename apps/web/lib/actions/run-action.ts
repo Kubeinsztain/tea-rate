@@ -18,6 +18,9 @@ export type RunActionOptions = {
  * - typed `Fail`        -> `{ status: "error", error: toWireError(fail) }`
  * - unexpected `Defect` -> `{ status: "error", error: INTERNAL }` + `onError`
  *
+ * An unexpected `Defect` is logged through Effect's `Logger` (via
+ * `Effect.tapDefect`) so server-side failures aren't silently swallowed.
+ *
  * Never throws across the network boundary, and never leaks a raw driver/DB
  * message to the client.
  */
@@ -25,7 +28,16 @@ export async function runAction<T, E>(
   program: Effect.Effect<T, E>,
   options?: RunActionOptions,
 ): Promise<ActionResult<T>> {
-  const exit = await Effect.runPromiseExit(program);
+  const exit = await Effect.runPromiseExit(
+    program.pipe(
+      Effect.tapDefect((defect) =>
+        Effect.logError(
+          "server action failed with an unexpected defect",
+          defect,
+        ),
+      ),
+    ),
+  );
 
   if (Exit.isSuccess(exit)) {
     return { status: "success", data: exit.value };

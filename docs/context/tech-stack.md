@@ -37,6 +37,25 @@
 - **Renovate + GitHub Actions + lefthook** — dependency updates, CI, and git
   hooks respectively.
 
+## Deployment & operations
+
+- **podman** + **`podman compose`** — the container runtime and orchestrator;
+  daemonless, no Docker Engine. See
+  [ADR-0008](../decisions/0008-deployment-operations.md).
+- **nginx** — reverse proxy routing to `apps/web` and `/api/auth/*` through to
+  the auth service.
+- **certbot** — TLS: self-signed for local/IP-only use now; Let's Encrypt once a
+  domain exists (scriptable for CI/CD).
+- **OCI images** — `apps/web` (Next.js `standalone`) and `apps/auth` (Bun) ship
+  as containers.
+- **Mail seam** — `MailSender` with a `consoleMailSender` (log-only) default and
+  `smtpMailSender` for real delivery, selected by `MAIL_MODE`. See
+  [ADR-0009](../decisions/0009-mail-delivery-seam.md).
+- **Secrets** — gitignored `.env` (dev), GitHub Environments/Actions secrets
+  (CI), host `.env` / podman secrets (runtime).
+- **Operability** — `/api/health` endpoints and Effect structured logging (the
+  first phase of the [observability work](../work/observability/README.md)).
+
 ## Related
 
 - [Repository map](repository-map.md) — which package uses which.

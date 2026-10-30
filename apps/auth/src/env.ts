@@ -6,9 +6,10 @@ import { z } from "zod";
  * `createEnv` throws at module load if a required variable is missing or
  * invalid, so misconfiguration fails fast at startup.
  *
- * `SMTP_*` values drive the SMTP mail transport (`mail/smtp.ts`); validating
- * them here means a missing SMTP setting fails fast instead of surfacing as a
- * delivery error later.
+ * `MAIL_MODE` selects the mail seam: `"console"` (default) logs messages
+ * through the `consoleMailSender`, so a self-hosted deployment needs no SMTP
+ * configuration; `"smtp"` delivers through Nodemailer and requires the `SMTP_*`
+ * settings, which are therefore optional here (only `"smtp"` mode needs them).
  */
 export const env = createEnv({
   server: {
@@ -22,11 +23,13 @@ export const env = createEnv({
      * `Origin` header (the browser's origin) is accepted during sign-in.
      */
     WEB_ORIGIN: z.string().url().default("http://localhost:3000"),
-    SMTP_HOST: presets.nonEmptyString,
-    SMTP_PORT: presets.port,
-    SMTP_USER: presets.nonEmptyString,
-    SMTP_PASS: presets.nonEmptyString,
-    SMTP_FROM: z.string().email(),
+    /** Mail delivery seam: log-only (`"console"`) or Nodemailer SMTP. */
+    MAIL_MODE: z.enum(["console", "smtp"]).default("console"),
+    SMTP_HOST: presets.nonEmptyString.optional(),
+    SMTP_PORT: presets.port.optional(),
+    SMTP_USER: presets.nonEmptyString.optional(),
+    SMTP_PASS: presets.nonEmptyString.optional(),
+    SMTP_FROM: z.string().email().optional(),
     PORT: presets.port.default(4000),
   },
   shared: {

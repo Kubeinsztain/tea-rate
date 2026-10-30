@@ -1,0 +1,37 @@
+# tea-rate migrate — one-shot image applying both Drizzle migrations.
+#
+# Run against a live Postgres with the two target URLs provided as env vars:
+#   JOURNAL_DATABASE_URL  ->  the journal database (packages/infra)
+#   AUTH_DATABASE_URL     ->  the auth service database (apps/auth)
+# The auth database is created (idempotently) if it does not exist.
+
+FROM docker.io/oven/bun:1.4.4 AS migrate
+
+WORKDIR /app
+
+# Copy the whole repo (`.dockerignore` drops node_modules, .git, build outputs
+# and secrets). Dev dependencies are required (drizzle-kit is a devDependency of
+# both packages/infra and apps/auth).
+COPY . .
+# --ignore-scripts skips the root `prepare` script (lefthook install), which
+# needs git — not present in the Bun image, and useless inside a container.
+RUN bun install --frozen-lockfile --ignore-scripts
+
+# Both drizzle configs import @repo/env from its tsdown build output (dist/).
+RUN cd packages/env && bun run build
+
+# Migration entrypoint: ensure the auth database exists, then apply the journal
+# and auth migrations, each against its own URL. The script lives in
+# scripts/migrate.sh (kept as a file rather than an inline heredoc).
+COPY scripts/migrate.sh /usr/local/bin/migrate.sh
+RUN chmod +x /usr/local/bin/migrate.sh
+
+# Run as a non-root user: the migrate job holds DB write credentials at
+# runtime, so it must not run as uid 0.
+RUN groupadd --system --gid 1001 migrate \
+    && useradd --system --uid 1001 --gid migrate migrate
+ENV HOME=/tmp
+
+USER migrate
+
+ENTRYPOINT ["/usr/local/bin/migrate.sh"]

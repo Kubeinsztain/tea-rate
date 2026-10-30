@@ -1,0 +1,37 @@
+# Version control — never needed in the build context.
+.git
+.gitignore
+
+# Dependencies — reinstalled from bun.lock inside the image.
+node_modules
+**/node_modules
+
+# Build outputs — rebuilt inside the image.
+.next
+**/.next
+dist
+**/dist
+.turbo
+**/.turbo
+coverage
+**/coverage
+
+# Local environment files and secrets — must never be baked into an image.
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+
+# Docs and CI — not required to build the apps.
+docs
+.github
+
+# Misc noise.
+*.log
+.DS_Store
+.vercel

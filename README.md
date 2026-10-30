@@ -36,7 +36,7 @@ Dependencies point inward: `web → infra → core`.
 ```sh
 bun install
 just env                      # create .env from .env.example
-just db-up                    # Postgres 18 (docker compose up)
+just db-up                    # Postgres 18 (podman compose up)
 just db-generate              # create SQL migrations from the schema
 just db-migrate               # apply migrations
 just db-seed                  # insert a few sample teas

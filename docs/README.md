@@ -59,6 +59,10 @@ deleted.
 - [Observability tooling](work/observability/README.md) — proposed
   monitoring/logging/ops stack: Effect logging, GlitchTip, Gatus,
   OpenTelemetry; alternatives compared, phased plan.
+- [Deployment](work/deployment/README.md) — "run for real": podman + nginx
+  self-hosting, app images, health + logging, mail mock, secrets. See
+  [ADR-0008](decisions/0008-deployment-operations.md) and
+  [ADR-0009](decisions/0009-mail-delivery-seam.md).
 
 ## Direction
 
